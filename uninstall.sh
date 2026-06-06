@@ -31,6 +31,11 @@ rm -rf /etc/modprobe.d/xone-blacklist.conf || true
 rm -rf /var/lib/dkms/xone* || true
 echo -e "All xone versions removed\n"
 
+rm -f /usr/local/bin/xone-easypair || true
+rm -f /usr/share/applications/xone-easypair.desktop || true
+rm -f /usr/share/polkit-1/actions/org.xone.easypair.policy || true
+echo -e "EasyPair files removed\n"
+
 [[ ${1:-} == "--no-firmware" ]] && exit 0
 rm -rf /lib/firmware/xow_dongle* || true
 rm -rf /lib/firmware/xone_dongle* || true
