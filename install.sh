@@ -14,13 +14,16 @@ fi
 
 cc=${CC:-cc}
 install_easypair=true
+install_easypair_desktop=true
 if ! [ -x "$(command -v "$cc")" ]; then
     echo 'EasyPair requires a C compiler. Skipping EasyPair installation.' >&2
     install_easypair=false
+    install_easypair_desktop=false
 fi
 
 if ! [ -x "$(command -v pkexec)" ]; then
     echo 'EasyPair desktop launcher requires polkit (pkexec).' >&2
+    install_easypair_desktop=false
 fi
 
 if [ -f /usr/local/bin/xow ]; then
@@ -41,6 +44,7 @@ version=${version##v}
 source="/usr/src/xone-$version"
 log="/var/lib/dkms/xone/$version/build/make.log"
 easypair_bin="/usr/local/bin/xone-easypair"
+easypair_desktop="/usr/share/applications/xone-easypair.desktop"
 easypair_tmp="$(mktemp)"
 
 cleanup() {
@@ -78,6 +82,10 @@ if dkms install -m xone -v "$version" --force; then
         echo "Installing xone-easypair..."
         "$cc" -Wall -Wextra -O2 -o "$easypair_tmp" easypair/pair.c
         install -D -m 755 "$easypair_tmp" "$easypair_bin"
+
+        if [ "$install_easypair_desktop" = true ]; then
+            install -D -m 644 easypair/pair.desktop "$easypair_desktop"
+        fi
     fi
 
     # Avoid conflicts between xpad and xone
