@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD polkit Policy Configuration 1.0//EN"
+"http://www.freedesktop.org/software/polkit/policyconfig-1.dtd">
+
+<policyconfig>
+<vendor>xone-EasyPair</vendor>
+<vendor_url>https://github.com/OB-Ryan/xone-EasyPair</vendor_url>
+<action id="org.xone.easypair.run">
+    <description>Enable wireless pairing through xone</description>
+    <message>Authentication is required to enable wireless pairing.</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/local/bin/xone-easypair</annotate>
+  </action>
+</policyconfig>
