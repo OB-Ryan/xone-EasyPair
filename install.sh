@@ -12,6 +12,17 @@ if ! [ -x "$(command -v dkms)" ]; then
     exit 1
 fi
 
+cc=${CC:-cc}
+install_easypair=true
+if ! [ -x "$(command -v "$cc")" ]; then
+    echo 'EasyPair requires a C compiler. Skipping EasyPair installation.' >&2
+    install_easypair=false
+fi
+
+if ! [ -x "$(command -v pkexec)" ]; then
+    echo 'EasyPair desktop launcher requires polkit (pkexec).' >&2
+fi
+
 if [ -f /usr/local/bin/xow ]; then
     echo 'Please uninstall xow!' >&2
     exit 1
@@ -29,6 +40,13 @@ version=${version##v}
 
 source="/usr/src/xone-$version"
 log="/var/lib/dkms/xone/$version/build/make.log"
+easypair_bin="/usr/local/bin/xone-easypair"
+easypair_tmp="$(mktemp)"
+
+cleanup() {
+    rm -f "$easypair_tmp"
+}
+trap cleanup EXIT
 
 if [ -n "$(dkms status xone)" ]; then
     echo -e 'Driver is already installed, uninstalling...\n'
@@ -55,6 +73,12 @@ fi
 if dkms install -m xone -v "$version" --force; then
     # The blacklist should be placed in /usr/local/lib/modprobe.d for kmod 29+
     install -D -m 644 install/modprobe.conf /etc/modprobe.d/xone-blacklist.conf
+
+    if [ "$install_easypair" = true ]; then
+        echo "Installing xone-easypair..."
+        "$cc" -Wall -Wextra -O2 -o "$easypair_tmp" easypair/pair.c
+        install -D -m 755 "$easypair_tmp" "$easypair_bin"
+    fi
 
     # Avoid conflicts between xpad and xone
     if lsmod | grep -q '^xpad'; then
