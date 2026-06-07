@@ -33,6 +33,7 @@ echo -e "All xone versions removed\n"
 
 rm -f /usr/local/bin/xone-easypair || true
 rm -f /usr/share/applications/xone-easypair.desktop || true
+rm -f /usr/share/icons/hicolor/scalable/apps/xone-easypair.svg || true
 rm -f /usr/share/polkit-1/actions/org.xone.easypair.policy || true
 echo -e "EasyPair files removed\n"
 

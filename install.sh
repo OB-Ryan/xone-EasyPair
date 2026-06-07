@@ -45,6 +45,7 @@ source="/usr/src/xone-$version"
 log="/var/lib/dkms/xone/$version/build/make.log"
 easypair_bin="/usr/local/bin/xone-easypair"
 easypair_desktop="/usr/share/applications/xone-easypair.desktop"
+easypair_icon="/usr/share/icons/hicolor/scalable/apps/xone-easypair.svg"
 easypair_policy="/usr/share/polkit-1/actions/org.xone.easypair.policy"
 easypair_tmp="$(mktemp)"
 
@@ -86,6 +87,7 @@ if dkms install -m xone -v "$version" --force; then
 
         if [ "$install_easypair_desktop" = true ]; then
             install -D -m 644 easypair/pair.desktop "$easypair_desktop"
+            install -D -m 644 easypair/logo.svg "$easypair_icon"
             install -D -m 644 easypair/org.xone.easypair.policy "$easypair_policy"
         fi
     fi
