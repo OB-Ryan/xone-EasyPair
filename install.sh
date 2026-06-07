@@ -87,7 +87,7 @@ if dkms install -m xone -v "$version" --force; then
 
         if [ "$install_easypair_desktop" = true ]; then
             install -D -m 644 easypair/pair.desktop "$easypair_desktop"
-            install -D -m 644 easypair/logo.svg "$easypair_icon"
+            install -D -m 644 easypair/xone-easypair.svg "$easypair_icon"
             install -D -m 644 easypair/org.xone.easypair.policy "$easypair_policy"
         fi
     fi
