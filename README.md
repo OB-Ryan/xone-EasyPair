@@ -3,15 +3,18 @@
 </p>
 
 <p align="center">
-    <a href="https://github.com/dlundqvist/xone/releases/latest"><img src="https://img.shields.io/github/v/release/dlundqvist/xone?logo=github" alt="Release Badge"></a>
+    <a href="https://github.com/OB-Ryan/xone-EasyPair/releases/latest"><img src="https://img.shields.io/github/v/release/OB-Ryan/xone-EasyPair?logo=github" alt="Release Badge"></a>
     <a href="https://discord.gg/T3dSC3ReuS"><img src="https://img.shields.io/discord/733964971842732042?label=discord&logo=discord" alt="Discord Badge"></a>
 </p>
 
 `xone` is a Linux kernel driver for Xbox One and Xbox Series X|S accessories. It serves as a modern replacement for
 `xpad`, aiming to be compatible with Microsoft's *Game Input Protocol* (GIP).
 
+This fork adds **EasyPair**, a small desktop launcher for enabling Xbox Wireless pairing without manually writing to
+the driver `sysfs` interface.
+
 > [!NOTE]
-> The original project is in maintance mode, please refer to this one for updates and issues.
+> The original project is in maintenance mode, please refer to this one for updates and issues.
 > 
 > Huge thanks to medusalix for all the work and creating this driver!
 
@@ -110,6 +113,8 @@ make clean
 - DKMS
 - curl (for firmware download)
 - bsdtar (for firmware extraction)
+- C compiler (optional; required to install the EasyPair helper)
+- polkit with `pkexec` (optional; required for the EasyPair desktop launcher)
 - For SecureBoot-enabled systems see [SecureBoot dkms guide](https://github.com/dell/dkms#secure-boot)
 
 ### Guide
@@ -119,13 +124,13 @@ make clean
 2. Clone the repository:
 
 ```
-git clone https://github.com/dlundqvist/xone
+git clone https://github.com/OB-Ryan/xone-EasyPair
 ```
 
 3. Install `xone`:
 
 ```
-cd xone
+cd xone-EasyPair
 sudo make install
 ```
 
@@ -140,13 +145,13 @@ sudo install/firmware.sh
 > The `--skip-disclaimer` flag might be useful for scripting purposes.
 
 > [!TIP]
-> The `xone-dongle.fw_override=0x0000` module paramter can be used to load a different firmware file than the one selected automatically by the driver. The value is the USB PID contained in the fw file eg. `xone_dongle_02fe.bin`
+> The `xone-dongle.fw_override=0x0000` module parameter can be used to load a different firmware file than the one selected automatically by the driver. The value is the USB PID contained in the fw file eg. `xone_dongle_02fe.bin`
 
 5. Plug in your Xbox devices.
 
 ### Updating
 
-Just run the install script again after pulling the newset changes from the repository.
+Just run the install script again after pulling the newest changes from the repository.
 
 ```
 git pull
@@ -156,6 +161,10 @@ sudo make install
 Reboot is highly suggested
 
 ### Steam Deck/SteamOS
+
+> [!NOTE]
+> EasyPair has not been verified on Steam Deck/SteamOS.
+
 #### Automatic install
 First, let's set a password
 ```bash
@@ -166,11 +175,14 @@ Run installation script
 ```bash
 sudo sh -c "$(curl -fsSL https://raw.githubusercontent.com/dlundqvist/xone/master/install/steam-deck-install.sh)"
 ```
+
+This script installs upstream xone behavior and has not been updated to include EasyPair.
+
 #### Uninstall:
 ```bash
 sudo pacman -Rcns xone-dkms
 ```
-Optionally, lock your deck and  remove password
+Optionally, lock your deck and remove the password
 ```bash
 steamos-readonly enable
 # enter current one and leave the new password blank
@@ -195,6 +207,32 @@ been previously plugged into a USB port or used via Bluetooth.
 Instructions for pairing your devices can be found
 [here](https://support.xbox.com/en-US/help/hardware-network/controller/connect-xbox-wireless-controller-to-pc)
 (see the section on *Xbox Wireless*).
+
+### EasyPair
+
+EasyPair provides a desktop launcher for enabling pairing mode on the Xbox Wireless Dongle. After installation, look for
+`EasyPair` in your application launcher. Starting it will open a polkit authentication prompt, then enable pairing mode
+on the first detected `xone-dongle` device.
+
+You can also start EasyPair from a terminal:
+
+```
+pkexec /usr/local/bin/xone-easypair
+```
+
+If polkit is not available, the helper can be run directly with `sudo`:
+
+```
+sudo /usr/local/bin/xone-easypair
+```
+
+Once pairing is enabled, put your controller into Xbox Wireless pairing mode. The driver will disable pairing automatically after a successful pair or when the pairing timeout expires.
+
+#### Implementation
+
+EasyPair is implemented as a small C helper in `easypair/pair.c`. The helper finds the active dongle instance under
+`/sys/bus/usb/drivers/xone-dongle/` and writes `1` to its `pairing` attribute. The kernel driver remains responsible for
+the actual pairing flow, including channel scanning, pairing timeout, and client registration.
 
 ## Kernel interface
 
